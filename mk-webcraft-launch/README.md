@@ -25,6 +25,8 @@ npm run inspect -- 120 450 885   # render QA stills to out/inspect/
 
 `npm run sfx` (run automatically before `dev`, `render` and `still`) synthesises the sound effects into `public/sfx/`.
 
+The master is H.264 High (CRF 16) in BT.709 / TV range, rendered from PNG frames so the brand neon decodes the same in every player, with 48 kHz stereo AAC (about −21 LUFS integrated, −3.5 dBFS peak). Settings live in `remotion.config.ts`.
+
 ## Editing
 
 - **Timing and sound sync** — `src/timeline.ts` is the single source of truth. Every visual cue (`CUES`) and every sound effect (`SFX`) is a frame number on a 120 BPM grid (15 frames per beat). Move a cue and the matching sound moves with it.
