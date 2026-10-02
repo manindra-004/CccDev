@@ -13,7 +13,7 @@ const CARDS = [
 export const PortfolioWall: React.FC<{ start: number; exitAt: number }> = ({ start, exitAt }) => {
   const frame = useCurrentFrame();
   const enter = progress(frame, start, 30, EASE.out);
-  const exit = progress(frame, exitAt, 20, EASE.in);
+  const exit = progress(frame, exitAt, 16, EASE.inOut);
   if (enter <= 0 || exit >= 1) return null;
   const drift = (frame - start) * 0.25;
 

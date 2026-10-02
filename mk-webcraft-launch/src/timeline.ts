@@ -20,9 +20,9 @@ export const SEARCH_QUERY = 'best jewellery store near me';
 
 export const CUES = {
   // Scene 1 - First impressions happen online.
-  caretIn: 8,
-  pillOpen: 15,
-  typeStart: 26,
+  caretIn: 4,
+  pillOpen: 12,
+  typeStart: 22,
   typeFramesPerChar: 1,
   title1: 58,
   enter: 130,
@@ -66,22 +66,27 @@ export const CUES = {
   stat1: 610,
   stat2: 626,
   riser: 684,
-  collapse: 688,
-  title4Out: 680,
+  collapse: 684,
+  collapseFrames: 20,
+  title4Out: 678,
 
-  // Scene 5 - Logo reveal.
+  // Scene 5 - Logo reveal: the outline draws out of the point of light during the riser, then the hit fills it.
+  logoDraw: 700,
   logoHit: 720,
-  logoFill: 736,
-  logoSweep: 760,
-  lockup: 780,
-  wordmarkIn: 786,
-  taglineIn: 804,
-  urlIn: 830,
+  logoFill: 720,
+  logoSweep: 744,
+  lockup: 768,
+  wordmarkIn: 774,
+  taglineIn: 792,
+  urlIn: 816,
 } as const;
 
 export const TYPE_END = CUES.typeStart + SEARCH_QUERY.length * CUES.typeFramesPerChar;
 
 type SfxCue = { frame: number; file: string; volume: number };
+
+// Whooshes swell for ~11 frames before peaking; starting them early lands the peak on the fastest part of each move.
+const WHOOSH_LEAD = 5;
 
 // Volumes are tiered so the hero moments (window morph, rebuild beam, logo hit) carry the most
 // weight and small UI elements stay a whisper.
@@ -90,11 +95,11 @@ export const SFX: SfxCue[] = [
 
   // Scene 1
   { frame: CUES.caretIn, file: 'tick', volume: 0.2 },
-  { frame: CUES.pillOpen, file: 'whoosh', volume: 0.3 },
+  { frame: CUES.pillOpen - WHOOSH_LEAD, file: 'whoosh', volume: 0.3 },
   { frame: CUES.typeStart, file: 'typing', volume: 0.15 },
   { frame: CUES.title1, file: 'swell', volume: 0.24 },
   { frame: CUES.enter, file: 'click', volume: 0.28 },
-  { frame: CUES.morph, file: 'whoosh-glass', volume: 0.42 },
+  { frame: CUES.morph - WHOOSH_LEAD, file: 'whoosh-glass', volume: 0.42 },
 
   // Scene 2
   { frame: CUES.windowLand, file: 'land', volume: 0.3 },
@@ -113,12 +118,12 @@ export const SFX: SfxCue[] = [
   { frame: CUES.marquee, file: 'swipe', volume: 0.15 },
   { frame: CUES.codePanel, file: 'pop', volume: 0.18 },
   { frame: CUES.codeTyping, file: 'typing', volume: 0.11 },
-  { frame: CUES.panelsOut, file: 'whoosh-out', volume: 0.2 },
+  { frame: CUES.panelsOut - 2, file: 'whoosh-out', volume: 0.2 },
   ...CUES.chips.map((frame, i) => ({ frame, file: `note-${i + 1}`, volume: 0.19 })),
   { frame: CUES.secure, file: 'click-bright', volume: 0.25 },
 
   // Scene 4
-  { frame: CUES.toDevices, file: 'whoosh', volume: 0.3 },
+  { frame: CUES.toDevices - WHOOSH_LEAD, file: 'whoosh', volume: 0.3 },
   { frame: CUES.tablet, file: 'pop', volume: 0.2 },
   { frame: CUES.phone, file: 'pop', volume: 0.2 },
   { frame: CUES.title4, file: 'swell', volume: 0.24 },
@@ -128,7 +133,6 @@ export const SFX: SfxCue[] = [
 
   // Scene 5
   { frame: CUES.logoHit, file: 'impact', volume: 0.75 },
-  { frame: CUES.logoFill, file: 'shimmer', volume: 0.18 },
   { frame: CUES.logoSweep, file: 'sparkle', volume: 0.24 },
   { frame: CUES.wordmarkIn, file: 'whoosh', volume: 0.2 },
   { frame: CUES.taglineIn, file: 'tone', volume: 0.22 },

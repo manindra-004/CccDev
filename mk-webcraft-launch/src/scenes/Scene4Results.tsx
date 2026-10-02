@@ -1,27 +1,27 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame } from 'remotion';
 import { Phone, PHONE, PHONE_H, Tablet, TABLET, TABLET_H } from '../components/Devices';
-import { windowPlacement } from '../components/HeroWindow';
+import { COLLAPSE_POINT as COLLAPSE_TO, windowPlacement } from '../components/HeroWindow';
 import { StatBadge } from '../components/StatBadge';
 import { mix, springAt, SPRINGS } from '../lib/motion';
 import { CUES } from '../timeline';
 
-const COLLAPSE_TO = { x: 960, y: 560 };
-
 const deviceStyle = (frame: number, start: number, home: { x: number; y: number }, w: number, h: number, fromX: number): React.CSSProperties => {
   const p = springAt(frame, start, SPRINGS.glide);
-  const { collapse } = windowPlacement(frame);
+  const { collapse, breath, alpha } = windowPlacement(frame);
   const bob = Math.sin((frame - start) / 22) * 4;
-  const x = mix(home.x + fromX * (1 - p), COLLAPSE_TO.x, collapse * 0.9);
-  const y = mix(home.y + bob, COLLAPSE_TO.y, collapse * 0.9);
-  const scale = (0.9 + 0.1 * p) * mix(1, 0.2, collapse);
+  const out = 1 + breath * 2.5;
+  const x = mix(COLLAPSE_TO.x + (home.x + fromX * (1 - p) - COLLAPSE_TO.x) * out, COLLAPSE_TO.x, collapse * 0.9);
+  const y = mix(COLLAPSE_TO.y + (home.y + bob - COLLAPSE_TO.y) * out, COLLAPSE_TO.y, collapse * 0.9);
+  const scale = (0.9 + 0.1 * p) * (1 + breath) * mix(1, 0.2, collapse);
+  const blur = Math.max(0, 1 - p) * 8 + collapse * 10;
   return {
     position: 'absolute',
     left: x - w / 2,
     top: y - h / 2,
     transform: `scale(${scale}) rotate(${(1 - p) * (fromX < 0 ? -7 : 7)}deg)`,
-    opacity: Math.min(1, p * 1.6) * (1 - collapse),
-    filter: collapse > 0.01 ? `blur(${collapse * 10}px)` : undefined,
+    opacity: Math.min(1, p * 1.6) * alpha,
+    filter: blur > 0.15 ? `blur(${blur}px)` : undefined,
   };
 };
 

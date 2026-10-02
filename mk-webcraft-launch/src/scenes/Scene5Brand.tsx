@@ -118,23 +118,29 @@ export const Scene5Brand: React.FC = () => {
   const frame = useCurrentFrame();
   if (frame < CUES.collapse + 8) return null;
 
-  const point = interpolate(frame, [CUES.collapse + 8, CUES.logoHit - 2, CUES.logoHit], [0, 0.7, 1], clampOpts);
+  const point = interpolate(
+    frame,
+    [CUES.collapse + 8, CUES.collapse + CUES.collapseFrames, CUES.logoHit - 2, CUES.logoHit],
+    [0, 0.55, 0.75, 1],
+    clampOpts,
+  );
   const flash = progress(frame, CUES.logoHit, 18, EASE.out);
   const ring = progress(frame, CUES.logoHit, 34, EASE.out);
-  const settle = springAt(frame, CUES.logoHit, SPRINGS.glide);
+  // Under-damped so the mark contracts past its rest size on the hit and springs back: the "punch".
+  const punch = springAt(frame, CUES.logoHit, { damping: 9, stiffness: 200, mass: 0.6 });
   const lock = springAt(frame, CUES.lockup, { damping: 26, stiffness: 90, mass: 1 });
 
-  const draw = progress(frame, CUES.logoHit, 36, EASE.inOut);
-  const strokeAlpha = interpolate(frame, [CUES.logoHit, CUES.logoHit + 2, CUES.logoFill + 18, CUES.logoFill + 36], [0, 1, 1, 0], clampOpts);
-  const fill = progress(frame, CUES.logoFill, 30, EASE.inOut);
-  const glow = interpolate(frame, [CUES.logoFill, CUES.logoFill + 24, CUES.lockup + 20], [0, 1, 0.65], clampOpts) * (0.9 + 0.1 * Math.sin(frame / 16));
+  const draw = progress(frame, CUES.logoDraw, CUES.logoHit - CUES.logoDraw - 2, EASE.inOut);
+  const strokeAlpha = interpolate(frame, [CUES.logoDraw, CUES.logoDraw + 5, CUES.logoHit + 8, CUES.logoHit + 24], [0, 1, 1, 0], clampOpts);
+  const fill = progress(frame, CUES.logoFill, 20, EASE.out);
+  const glow = interpolate(frame, [CUES.logoHit, CUES.logoHit + 10, CUES.lockup + 20], [0, 1, 0.65], clampOpts) * (0.9 + 0.1 * Math.sin(frame / 16));
   const sweep = progress(frame, CUES.logoSweep, 26, EASE.inOut);
   const raster = progress(frame, CUES.logoSweep + 6, 18, EASE.inOut);
 
-  const height = mix(430, 272, lock) * mix(1.08, 1, settle);
+  const height = mix(430, 272, lock) * mix(1.06, 1, punch);
   const width = height * LOGO_ASPECT;
   const cy = mix(530, 358, lock);
-  const tilt = (1 - settle) * -3;
+  const tilt = (1 - Math.min(1, punch)) * -3;
 
   const aura = interpolate(frame, [CUES.logoHit, CUES.logoHit + 10, CUES.logoHit + 60, CUES.lockup + 30], [0, 1, 0.75, 0.55], clampOpts);
 
@@ -145,7 +151,7 @@ export const Scene5Brand: React.FC = () => {
           style={{
             position: 'absolute',
             left: 960 - 60,
-            top: 540 - 60,
+            top: 530 - 60,
             width: 120,
             height: 120,
             borderRadius: '50%',
@@ -224,7 +230,7 @@ export const Scene5Brand: React.FC = () => {
         );
       })}
 
-      {frame >= CUES.logoHit ? (
+      {frame >= CUES.logoDraw ? (
         <div
           style={{
             position: 'absolute',

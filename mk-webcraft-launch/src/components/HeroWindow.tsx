@@ -1,6 +1,6 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import { EASE, mix, progress, springAt, SPRINGS } from '../lib/motion';
+import { clamp01, EASE, mix, progress, springAt, SPRINGS } from '../lib/motion';
 import { CUES, SEARCH_QUERY, TYPE_END } from '../timeline';
 import { COLORS, FONTS, neon, white } from '../theme';
 import { BlueprintBase, BlueprintOverlay } from './Blueprint';
@@ -11,19 +11,30 @@ import { ViscontSite } from './ViscontSite';
 export const WINDOW_W = 1180;
 export const WINDOW_H = 660;
 export const CHROME_H = 52;
-const PILL = { cx: 960, cy: 652, w: 860, h: 78 };
+const PILL = { cx: 960, cy: 668, w: 860, h: 78 };
 
 const clampOpts = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
+
+// Collapse into the point of light: a short outward breath (anticipation), then an accelerating pull inward.
+export const collapseAt = (frame: number) => {
+  const t = clamp01((frame - CUES.collapse) / CUES.collapseFrames);
+  const breath = t < 0.3 ? Math.sin((t / 0.3) * Math.PI) * 0.03 : 0;
+  const inward = t < 0.15 ? 0 : ((t - 0.15) / 0.85) ** 2.2;
+  // Opacity leads the shrink so the screen is clear by the time the logo outline starts to trace.
+  return { breath, inward, alpha: 1 - clamp01(inward * 1.3) };
+};
+
+export const COLLAPSE_POINT = { x: 960, y: 535 };
 
 // Placement of the finished window in each scene (centre + scale), shared with overlays.
 export const windowPlacement = (frame: number) => {
   const toCraft = progress(frame, CUES.beam, 40, EASE.inOut);
   const toDevices = springAt(frame, CUES.toDevices, SPRINGS.glide);
-  const collapse = progress(frame, CUES.collapse, 28, EASE.in);
-  const scale = mix(mix(1, 0.9, toCraft), 0.74, toDevices) * mix(1, 0.18, collapse);
+  const { breath, inward: collapse, alpha } = collapseAt(frame);
+  const scale = mix(mix(1, 0.9, toCraft), 0.74, toDevices) * (1 + breath) * mix(1, 0.18, collapse);
   const cx = 960;
-  const cy = mix(mix(615, 618, toCraft), 590, toDevices) + collapse * -30;
-  return { cx, cy, scale, toDevices, collapse };
+  const cy = mix(mix(mix(615, 618, toCraft), 590, toDevices), COLLAPSE_POINT.y, collapse);
+  return { cx, cy, scale, toDevices, collapse, breath, alpha };
 };
 
 const Spinner: React.FC<{ frame: number; color: string; size?: number }> = ({ frame, color, size = 16 }) => (
@@ -87,16 +98,18 @@ export const HeroWindow: React.FC = () => {
   if (frame < CUES.caretIn || frame > CUES.collapse + 30) return null;
 
   const open = springAt(frame, CUES.pillOpen, { damping: 18, stiffness: 110, mass: 1 });
-  const morph = springAt(frame, CUES.morph, { damping: 24, stiffness: 80, mass: 1 });
+  // Two-stage morph: the search bar widens and rises into the address-bar slot, then the body drops down from it.
+  const widen = springAt(frame, CUES.morph, { damping: 22, stiffness: 120, mass: 1 });
+  const morph = springAt(frame, CUES.morph + 6, { damping: 24, stiffness: 85, mass: 1 });
   const press = frame >= CUES.enter && frame < CUES.enter + 10 ? Math.sin(((frame - CUES.enter) / 10) * Math.PI) : 0;
   const ripple = progress(frame, CUES.enter, 22, EASE.out);
-  const { cx, cy, scale, toDevices, collapse } = windowPlacement(frame);
+  const { cx, cy, scale, toDevices, collapse, alpha } = windowPlacement(frame);
 
   const pillW = mix(4, PILL.w, open);
-  const w = mix(pillW, WINDOW_W, morph);
+  const w = mix(pillW, WINDOW_W, widen);
   const h = mix(PILL.h, WINDOW_H, morph);
-  const x = mix(PILL.cx, cx, morph) - w / 2;
-  const y = mix(PILL.cy, cy, morph) - h / 2;
+  const x = mix(PILL.cx, cx, widen) - w / 2;
+  const y = mix(PILL.cy - PILL.h / 2, cy - WINDOW_H / 2, widen);
   const radius = mix(PILL.h / 2, 18, morph);
 
   const abW = 520;
@@ -114,10 +127,10 @@ export const HeroWindow: React.FC = () => {
   const focus = interpolate(frame, [CUES.pillOpen + 6, CUES.pillOpen + 20, CUES.morph, CUES.morph + 10], [0, 1, 1, 0], clampOpts);
 
   const glassAlpha = Math.max(Math.min(1, open * 2.5), morph);
-  const searchAlpha = (1 - progress(frame, CUES.morph, 10, EASE.out)) * interpolate(open, [0.35, 0.8], [0, 1], clampOpts);
+  const searchAlpha = (1 - progress(frame, CUES.morph + 2, 8, EASE.out)) * interpolate(open, [0.35, 0.8], [0, 1], clampOpts);
   const loneCaret = 1 - interpolate(open, [0, 0.3], [0, 1], clampOpts);
-  const urlAlpha = progress(frame, CUES.morph + 14, 12, EASE.out);
-  const frameAlpha = progress(frame, CUES.morph, 14, EASE.out);
+  const urlAlpha = progress(frame, CUES.morph + 18, 12, EASE.out);
+  const frameAlpha = progress(frame, CUES.morph + 4, 14, EASE.out);
 
   const beamP = progress(frame, CUES.beam, CUES.beamEnd - CUES.beam, EASE.inOut);
   const beamX = mix(-60, SITE_W + 60, beamP);
@@ -127,7 +140,6 @@ export const HeroWindow: React.FC = () => {
   const beamGlow = interpolate(frame, [CUES.beam, CUES.beam + 6, CUES.beamEnd - 4, CUES.beamEnd + 4], [0, 1, 1, 0], clampOpts);
 
   const bezel = progress(frame, CUES.toDevices + 6, 18, EASE.out);
-  const fadeOut = 1 - collapse;
 
   return (
     <div
@@ -139,7 +151,7 @@ export const HeroWindow: React.FC = () => {
         height: 1080,
         transform: morph > 0.999 ? `translate(${cx}px, ${cy}px) scale(${scale}) translate(${-cx}px, ${-cy}px)` : undefined,
         transformOrigin: '0 0',
-        opacity: fadeOut,
+        opacity: alpha,
         filter: collapse > 0.01 ? `blur(${collapse * 10}px)` : undefined,
       }}
     >
