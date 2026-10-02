@@ -1,0 +1,32 @@
+{
+  "name": "mk-webcraft-launch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "30-second launch film for MK Webcraft (mkwebcraft.in), built entirely in code with Remotion.",
+  "type": "module",
+  "scripts": {
+    "predev": "npm run sfx",
+    "dev": "remotion studio",
+    "sfx": "node scripts/generate-sfx.mjs",
+    "logo": "python3 scripts/trace_logo.py",
+    "prerender": "npm run sfx",
+    "render": "remotion render MKWebcraftLaunch out/mk-webcraft-launch.mp4",
+    "prestill": "npm run sfx",
+    "still": "remotion still MKWebcraftLaunch out/still.png",
+    "inspect": "node scripts/inspect-frames.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.532",
+    "@remotion/fonts": "4.0.532",
+    "@remotion/noise": "4.0.532",
+    "@remotion/paths": "4.0.532",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.532"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}
