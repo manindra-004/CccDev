@@ -21,7 +21,8 @@ export const StatBadge: React.FC<Props> = ({ value, label, source, start, exitAt
   if (frame < start) return null;
   const p = springAt(frame, start, SPRINGS.smooth);
   const count = Math.round(value * progress(frame, start + 2, 24, EASE.out));
-  const exit = progress(frame, exitAt, 12, EASE.in);
+  const exit = progress(frame, exitAt, 14, EASE.inOut);
+  const fade = progress(frame, exitAt, 12, EASE.out);
 
   return (
     <div
@@ -31,7 +32,7 @@ export const StatBadge: React.FC<Props> = ({ value, label, source, start, exitAt
         top: y,
         transform: `translateX(${anchor === 'right' ? '-100%' : '0'}) translateY(${(1 - p) * 30 - exit * 20}px) scale(${0.94 + 0.06 * p})`,
         transformOrigin: anchor === 'right' ? 'right center' : 'left center',
-        opacity: Math.min(1, p * 1.5) * (1 - exit),
+        opacity: Math.min(1, p * 1.5) * (1 - fade),
         ...glass(),
         borderRadius: 24,
         padding: '18px 28px 18px 24px',

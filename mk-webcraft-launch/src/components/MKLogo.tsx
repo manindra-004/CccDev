@@ -135,18 +135,30 @@ export const MKLogo: React.FC<Props> = ({ height, draw, fill, sweep, raster, glo
           </g>
         ) : null}
 
-        {draw > 0 && draw < 1
-          ? LOGO_PARTS.map((p, i) => {
-              const pt = getPointAtLength(p.d, LENGTHS[i] * draw);
-              if (!pt) return null;
+        {draw > 0 && draw < 1 ? (
+          <g filter={`url(#${id}-line-glow)`}>
+            {LOGO_PARTS.map((p, i) => {
+              const L = LENGTHS[i];
+              const head = L * draw;
+              const seg = Math.min(90, head);
+              const pt = getPointAtLength(p.d, head);
               return (
                 <g key={p.id}>
-                  <circle cx={pt.x} cy={pt.y} r={16} fill={COLORS.neon} opacity={0.28} filter={`url(#${id}-line-glow)`} />
-                  <circle cx={pt.x} cy={pt.y} r={4.5} fill="#fbffe0" />
+                  <path
+                    d={p.d}
+                    fill="none"
+                    stroke="#fbffe0"
+                    strokeWidth={4.4}
+                    strokeLinecap="round"
+                    strokeDasharray={`${seg} ${L}`}
+                    strokeDashoffset={-(head - seg)}
+                  />
+                  {pt ? <circle cx={pt.x} cy={pt.y} r={9} fill="#ffffff" opacity={0.55} /> : null}
                 </g>
               );
-            })
-          : null}
+            })}
+          </g>
+        ) : null}
       </svg>
     </div>
   );

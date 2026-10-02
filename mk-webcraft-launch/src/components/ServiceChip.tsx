@@ -20,7 +20,8 @@ export const ServiceChip: React.FC<Props> = ({ label, icon, x, y, side, start, e
   if (frame < start) return null;
   const p = springAt(frame, start, { damping: 15, stiffness: 150, mass: 0.8 });
   const glow = 1 - progress(frame, start, 22, EASE.out);
-  const exit = progress(frame, exitAt, 14, EASE.in);
+  const exit = progress(frame, exitAt, 16, EASE.inOut);
+  const fade = progress(frame, exitAt, 13, EASE.out);
   const dir = side === 'left' ? -1 : 1;
 
   return (
@@ -29,9 +30,9 @@ export const ServiceChip: React.FC<Props> = ({ label, icon, x, y, side, start, e
         position: 'absolute',
         left: x,
         top: y,
-        transform: `translate(${side === 'left' ? '-100%' : '0'}, -50%) translateX(${(1 - p) * -dir * 46 + exit * dir * 120}px) scale(${0.86 + 0.14 * p})`,
+        transform: `translate(${side === 'left' ? '-100%' : '0'}, -50%) translateX(${(1 - p) * -dir * 46 + exit * dir * 110}px) scale(${0.86 + 0.14 * p})`,
         transformOrigin: side === 'left' ? 'right center' : 'left center',
-        opacity: Math.min(1, p * 1.6) * (1 - exit),
+        opacity: Math.min(1, p * 1.6) * (1 - fade),
         filter: exit > 0.01 ? `blur(${exit * 8}px)` : undefined,
         ...glass(),
         borderColor: `rgba(230,250,20,${0.12 + glow * 0.5})`,

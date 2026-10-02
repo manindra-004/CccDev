@@ -18,17 +18,18 @@ const Eyebrow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const panelMotion = (frame: number, start: number, exitAt: number, dir: number) => {
   const p = springAt(frame, start, SPRINGS.smooth);
-  const exit = progress(frame, exitAt, 14, EASE.in);
+  const exit = progress(frame, exitAt, 18, EASE.inOut);
+  const fade = progress(frame, exitAt, 15, EASE.out);
   return {
-    transform: `translateX(${(1 - p) * dir * 60 + exit * dir * 90}px) translateY(${(1 - p) * 20}px) scale(${0.94 + 0.06 * p})`,
-    opacity: Math.min(1, p * 1.5) * (1 - exit),
-    filter: exit > 0.01 ? `blur(${exit * 8}px)` : undefined,
+    transform: `translateX(${(1 - p) * dir * 60 + exit * dir * 80}px) translateY(${(1 - p) * 20}px) scale(${(0.94 + 0.06 * p) * (1 - exit * 0.05)})`,
+    opacity: Math.min(1, p * 1.5) * (1 - fade),
+    filter: exit > 0.01 ? `blur(${exit * 7}px)` : undefined,
   } as React.CSSProperties;
 };
 
 export const BrandPanel: React.FC<{ x: number; y: number }> = ({ x, y }) => {
   const frame = useCurrentFrame();
-  if (frame < CUES.brandPanel || frame > CUES.panelsOut + 16) return null;
+  if (frame < CUES.brandPanel || frame > CUES.panelsOut + 20) return null;
   const swatches = [
     { name: 'Noir', color: '#0b0906', ring: 'rgba(255,255,255,0.25)' },
     { name: 'Gold', color: COLORS.gold, ring: 'rgba(217,180,94,0.6)' },
@@ -135,7 +136,7 @@ const TOTAL_CHARS = CODE.reduce((sum, line) => sum + line.reduce((s, [t]) => s +
 
 export const CodePanel: React.FC<{ x: number; y: number }> = ({ x, y }) => {
   const frame = useCurrentFrame();
-  if (frame < CUES.codePanel || frame > CUES.panelsOut + 16) return null;
+  if (frame < CUES.codePanel || frame > CUES.panelsOut + 20) return null;
   const typed = Math.floor(progress(frame, CUES.codeTyping, CUES.codeTypingFrames, (t) => t) * TOTAL_CHARS);
   let budget = typed;
   let caretPlaced = false;

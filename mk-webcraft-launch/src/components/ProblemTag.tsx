@@ -22,7 +22,8 @@ export const ProblemTag: React.FC<Props> = ({ label, anchor, tag, start, exitAt 
   const ring = springAt(frame, start, SPRINGS.pop);
   const line = progress(frame, start + 2, 8, EASE.out);
   const pill = springAt(frame, start + 5, SPRINGS.smooth);
-  const exit = progress(frame, exitAt, 10, EASE.in);
+  const exit = progress(frame, exitAt, 14, EASE.inOut);
+  const fade = progress(frame, exitAt, 12, EASE.out);
   const pulse = ((frame - start) % 30) / 30;
   const toLeft = tag.x < anchor.x;
 
@@ -32,7 +33,7 @@ export const ProblemTag: React.FC<Props> = ({ label, anchor, tag, start, exitAt 
   const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
 
   return (
-    <div style={{ position: 'absolute', inset: 0, opacity: 1 - exit, filter: exit > 0 ? `blur(${exit * 6}px)` : undefined }}>
+    <div style={{ position: 'absolute', inset: 0, opacity: 1 - fade, filter: exit > 0 ? `blur(${exit * 6}px)` : undefined }}>
       <div
         style={{
           position: 'absolute',

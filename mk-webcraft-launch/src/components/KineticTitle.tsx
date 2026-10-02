@@ -72,17 +72,21 @@ export const KineticTitle: React.FC<Props> = ({
       {lines.map((line, li) => (
         <div key={li} style={{ whiteSpace: 'nowrap' }}>
           {line.map((w, wi) => {
-            const s = springAt(frame, start + w.index * stagger, WORD_SPRING);
-            const fade = progress(frame, start + w.index * stagger, 8, EASE.out);
+            const wordStart = start + w.index * stagger;
+            const s = springAt(frame, wordStart, WORD_SPRING);
+            const fade = progress(frame, wordStart, 8, EASE.out);
             const exit = exitAt === undefined ? 0 : progress(frame, exitAt + w.index * exitStagger, exitDuration, EASE.in);
             const y = (1 - s) * 105 - exit * 105;
             const blur = (1 - fade) * 10 + exit * 8;
+            // The mask only clips while the word travels, so the settled glow is never cut off.
+            const masked = frame < wordStart + 18 || exit > 0;
+            const glow = w.accent ? progress(frame, wordStart + 18, 14, EASE.out) * (1 - Math.min(1, exit * 3)) : 0;
             return (
               <span
                 key={w.index}
                 style={{
                   display: 'inline-block',
-                  overflow: 'hidden',
+                  overflow: masked ? 'hidden' : 'visible',
                   verticalAlign: 'top',
                   padding: '0.06em 0.12em 0.2em',
                   margin: '-0.06em -0.12em -0.2em',
@@ -96,7 +100,7 @@ export const KineticTitle: React.FC<Props> = ({
                     opacity: fade * (1 - exit),
                     filter: blur > 0.05 ? `blur(${blur}px)` : undefined,
                     color: w.accent ? accentColor : color,
-                    textShadow: w.accent ? `0 0 28px rgba(230,250,20,0.35)` : undefined,
+                    textShadow: glow > 0 ? `0 0 28px rgba(230,250,20,${0.4 * glow})` : undefined,
                     ...wordStyle,
                   }}
                 >
