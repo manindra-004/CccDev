@@ -133,7 +133,7 @@ export const Scene5Brand: React.FC = () => {
 
   const height = mix(430, 272, lock) * mix(1.08, 1, settle);
   const width = height * LOGO_ASPECT;
-  const cy = mix(530, 348, lock);
+  const cy = mix(530, 358, lock);
   const tilt = (1 - settle) * -3;
 
   const aura = interpolate(frame, [CUES.logoHit, CUES.logoHit + 10, CUES.logoHit + 60, CUES.lockup + 30], [0, 1, 0.75, 0.55], clampOpts);
@@ -178,9 +178,10 @@ export const Scene5Brand: React.FC = () => {
             width: 800,
             height: 800,
             borderRadius: '50%',
-            background: `radial-gradient(circle, rgba(255,255,240,0.55) 0%, ${neon(0.25)} 25%, ${neon(0)} 60%)`,
-            transform: `scale(${0.3 + flash * 1.6})`,
-            opacity: 1 - flash,
+            background: `radial-gradient(circle, rgba(255,255,235,0.95) 0%, ${neon(0.75)} 6%, ${neon(0.28)} 18%, ${neon(0.08)} 34%, ${neon(0)} 55%)`,
+            transform: `scale(${0.25 + flash * 1.2})`,
+            opacity: (1 - flash) ** 1.6,
+            mixBlendMode: 'screen',
           }}
         />
       ) : null}
@@ -236,10 +237,10 @@ export const Scene5Brand: React.FC = () => {
         </div>
       ) : null}
 
-      {frame >= CUES.wordmarkIn ? <Wordmark frame={frame} y={538} /> : null}
+      {frame >= CUES.wordmarkIn ? <Wordmark frame={frame} y={528} /> : null}
 
       {frame >= CUES.taglineIn - 2 ? (
-        <div style={{ position: 'absolute', left: 0, right: 0, top: 702 }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, top: 692 }}>
           <KineticTitle
             text="Turning ideas into powerful digital experiences."
             start={CUES.taglineIn}
@@ -252,7 +253,7 @@ export const Scene5Brand: React.FC = () => {
         </div>
       ) : null}
 
-      {frame >= CUES.urlIn ? <UrlPill frame={frame} y={782} /> : null}
+      {frame >= CUES.urlIn ? <UrlPill frame={frame} y={772} /> : null}
     </AbsoluteFill>
   );
 };

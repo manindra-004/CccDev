@@ -136,7 +136,7 @@ const TOTAL_CHARS = CODE.reduce((sum, line) => sum + line.reduce((s, [t]) => s +
 export const CodePanel: React.FC<{ x: number; y: number }> = ({ x, y }) => {
   const frame = useCurrentFrame();
   if (frame < CUES.codePanel || frame > CUES.panelsOut + 16) return null;
-  const typed = Math.floor(progress(frame, CUES.codeTyping, 30, (t) => t) * TOTAL_CHARS);
+  const typed = Math.floor(progress(frame, CUES.codeTyping, CUES.codeTypingFrames, (t) => t) * TOTAL_CHARS);
   let budget = typed;
   let caretPlaced = false;
 

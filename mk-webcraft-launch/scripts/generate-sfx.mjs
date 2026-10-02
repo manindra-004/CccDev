@@ -123,7 +123,7 @@ function burst(out, { start = 0, dur = 0.01, freq = 3000, q = 1.2, type = 'bp', 
 }
 
 // Freeverb-style stereo reverb, mixed in place.
-function reverb(out, { wet = 0.25, room = 0.82, damp = 0.35, preDelay = 0.012 } = {}) {
+function reverb(out, { wet = 0.22, room = 0.72, damp = 0.4, preDelay = 0.012 } = {}) {
   const scale = SR / 44100;
   const combT = [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617].map((v) => Math.round(v * scale));
   const apT = [556, 441, 341, 225].map((v) => Math.round(v * scale));
@@ -275,11 +275,11 @@ const sounds = {
   },
   // Gentle key taps for typing (search query, code panel).
   typing() {
-    const o = buffer(1.3);
+    const o = buffer(1.0);
     const rand = mulberry32(99);
     let t = 0.01;
     let k = 0;
-    while (t < 1.0) {
+    while (t < 0.85) {
       const a = 0.25 + rand() * 0.2;
       burst(o, { start: t, dur: 0.02, freq: 1800 + rand() * 1600, q: 1.4, decay: 0.0035, amp: a, pan: (rand() - 0.5) * 0.4, seed: 100 + k });
       tone(o, { start: t, dur: 0.03, freq: 190 + rand() * 40, decay: 0.008, amp: a * 0.35 });
@@ -316,35 +316,35 @@ const sounds = {
     reverb(o, { wet: 0.2 });
     return o;
   },
-  // Title swells: soft noise bloom + chord pad.
+  // Title swells: short airy bloom with a soft chord that clears quickly, leaving silence after.
   swell() {
-    const o = buffer(2.2);
-    noiseSweep(o, { dur: 1.2, type: 'lp', freqAt: (t) => 300 + 2600 * smooth(t), q: 0.6, ampAt: (t) => Math.sin(Math.PI * t) ** 2 * 0.45, seed: 13 });
+    const o = buffer(1.6);
+    noiseSweep(o, { dur: 0.75, type: 'lp', freqAt: (t) => 300 + 2600 * smooth(t), q: 0.6, ampAt: (t) => Math.sin(Math.PI * t) ** 2 * 0.45, seed: 13 });
     [57, 64, 69, 73, 76].forEach((n, k) =>
-      tone(o, { start: 0.02 * k, dur: 2.0, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.35)) * Math.exp(-Math.max(0, tt - 0.35) / 0.55), amp: 0.09, pan: (k - 2) * 0.25, partials: [[1, 1], [2, 0.12]] }),
+      tone(o, { start: 0.015 * k, dur: 1.3, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.16)) * Math.exp(-Math.max(0, tt - 0.16) / 0.3), amp: 0.09, pan: (k - 2) * 0.25, partials: [[1, 1], [2, 0.12]] }),
     );
     lowpass(o, 5000);
-    reverb(o, { wet: 0.4 });
+    reverb(o, { wet: 0.3 });
     return o;
   },
   'swell-low'() {
-    const o = buffer(2.2);
-    noiseSweep(o, { dur: 1.0, type: 'lp', freqAt: (t) => 200 + 900 * smooth(t), q: 0.6, ampAt: (t) => Math.sin(Math.PI * t) ** 2 * 0.5, seed: 17 });
+    const o = buffer(1.6);
+    noiseSweep(o, { dur: 0.7, type: 'lp', freqAt: (t) => 200 + 900 * smooth(t), q: 0.6, ampAt: (t) => Math.sin(Math.PI * t) ** 2 * 0.5, seed: 17 });
     [45, 52, 57, 60, 64].forEach((n, k) =>
-      tone(o, { start: 0.015 * k, dur: 2.0, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.3)) * Math.exp(-Math.max(0, tt - 0.3) / 0.5), amp: 0.1, pan: (k - 2) * 0.2, partials: [[1, 1], [2, 0.1]] }),
+      tone(o, { start: 0.012 * k, dur: 1.3, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.15)) * Math.exp(-Math.max(0, tt - 0.15) / 0.28), amp: 0.1, pan: (k - 2) * 0.2, partials: [[1, 1], [2, 0.1]] }),
     );
     lowpass(o, 3200);
-    reverb(o, { wet: 0.4 });
+    reverb(o, { wet: 0.3 });
     return o;
   },
   'swell-bright'() {
-    const o = buffer(2.4);
-    noiseSweep(o, { dur: 1.1, type: 'lp', freqAt: (t) => 500 + 4200 * smooth(t), q: 0.6, ampAt: (t) => Math.sin(Math.PI * t) ** 2 * 0.4, seed: 19 });
+    const o = buffer(1.7);
+    noiseSweep(o, { dur: 0.75, type: 'lp', freqAt: (t) => 500 + 4200 * smooth(t), q: 0.6, ampAt: (t) => Math.sin(Math.PI * t) ** 2 * 0.4, seed: 19 });
     [64, 68, 71, 76, 78, 83].forEach((n, k) =>
-      tone(o, { start: 0.025 * k, dur: 2.2, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.3)) * Math.exp(-Math.max(0, tt - 0.3) / 0.6), amp: 0.08, pan: (k - 2.5) * 0.22, partials: [[1, 1], [2, 0.1]] }),
+      tone(o, { start: 0.018 * k, dur: 1.4, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.15)) * Math.exp(-Math.max(0, tt - 0.15) / 0.32), amp: 0.08, pan: (k - 2.5) * 0.22, partials: [[1, 1], [2, 0.1]] }),
     );
     lowpass(o, 7000);
-    reverb(o, { wet: 0.42 });
+    reverb(o, { wet: 0.32 });
     return o;
   },
   // Digital stutter when the outdated site glitches.
@@ -452,14 +452,27 @@ const sounds = {
     reverb(o, { wet: 0.45 });
     return o;
   },
+  // Near-silent room tone for the whole film so the gaps read as silence, not dropouts.
+  air() {
+    const o = buffer(30);
+    noiseSweep(o, {
+      dur: 30,
+      type: 'lp',
+      freqAt: (t) => 700 + 250 * Math.sin(t * 9),
+      q: 0.5,
+      ampAt: (t) => smooth(Math.min(1, t * 30)) * smooth(Math.min(1, (1 - t) * 20)) * (0.85 + 0.15 * Math.sin(t * 37)),
+      seed: 999,
+    });
+    return o;
+  },
   // Warm, soft tone under the tagline.
   tone() {
-    const o = buffer(2.6);
+    const o = buffer(2.0);
     [64, 71, 76].forEach((n, k) =>
-      tone(o, { start: k * 0.03, dur: 2.4, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.25)) * Math.exp(-Math.max(0, tt - 0.25) / 0.7), amp: 0.12, pan: (k - 1) * 0.3, partials: [[1, 1], [2, 0.15], [3, 0.04]] }),
+      tone(o, { start: k * 0.03, dur: 1.8, freq: midi(n), env: (u, tt) => smooth(Math.min(1, tt / 0.2)) * Math.exp(-Math.max(0, tt - 0.2) / 0.5), amp: 0.12, pan: (k - 1) * 0.3, partials: [[1, 1], [2, 0.15], [3, 0.04]] }),
     );
     lowpass(o, 4500);
-    reverb(o, { wet: 0.45 });
+    reverb(o, { wet: 0.38 });
     return o;
   },
 };

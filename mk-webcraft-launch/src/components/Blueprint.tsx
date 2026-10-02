@@ -46,7 +46,7 @@ export const BlueprintOverlay: React.FC = () => {
         <text
           x={MARGIN}
           y={H - 14}
-          fill={neon(0.6 * progress(frame, CUES.grid + 6, 12))}
+          fill={neon(0.6 * progress(frame, CUES.grid + 6, 12) * (1 - progress(frame, CUES.marquee - 6, 8)))}
           fontFamily={FONTS.mono}
           fontSize={13}
           letterSpacing="0.06em"

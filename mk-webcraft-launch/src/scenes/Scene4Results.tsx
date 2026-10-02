@@ -47,7 +47,7 @@ export const Scene4Overlay: React.FC = () => {
   return (
     <AbsoluteFill>
       <StatBadge value={34} label="Conversion rate" source="Viscont Jewellery" start={CUES.stat1} exitAt={CUES.collapse - 6} x={96} y={262} />
-      <StatBadge value={19} label="Customer retention" source="Viscont Jewellery" start={CUES.stat2} exitAt={CUES.collapse - 4} x={1440} y={262} />
+      <StatBadge value={19} label="Customer retention" source="Viscont Jewellery" start={CUES.stat2} exitAt={CUES.collapse - 4} x={1824} y={262} anchor="right" />
     </AbsoluteFill>
   );
 };

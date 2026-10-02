@@ -4,9 +4,19 @@ import { EASE, progress, springAt, SPRINGS } from '../lib/motion';
 import { COLORS, FONTS, white } from '../theme';
 import { glass } from './glass';
 
-type Props = { value: number; label: string; source: string; start: number; exitAt: number; x: number; y: number };
+type Props = {
+  value: number;
+  label: string;
+  source: string;
+  start: number;
+  exitAt: number;
+  x: number;
+  y: number;
+  // Which edge of the card sits at x.
+  anchor?: 'left' | 'right';
+};
 
-export const StatBadge: React.FC<Props> = ({ value, label, source, start, exitAt, x, y }) => {
+export const StatBadge: React.FC<Props> = ({ value, label, source, start, exitAt, x, y, anchor = 'left' }) => {
   const frame = useCurrentFrame();
   if (frame < start) return null;
   const p = springAt(frame, start, SPRINGS.smooth);
@@ -19,7 +29,8 @@ export const StatBadge: React.FC<Props> = ({ value, label, source, start, exitAt
         position: 'absolute',
         left: x,
         top: y,
-        transform: `translateY(${(1 - p) * 30 - exit * 20}px) scale(${0.94 + 0.06 * p})`,
+        transform: `translateX(${anchor === 'right' ? '-100%' : '0'}) translateY(${(1 - p) * 30 - exit * 20}px) scale(${0.94 + 0.06 * p})`,
+        transformOrigin: anchor === 'right' ? 'right center' : 'left center',
         opacity: Math.min(1, p * 1.5) * (1 - exit),
         ...glass(),
         borderRadius: 24,
