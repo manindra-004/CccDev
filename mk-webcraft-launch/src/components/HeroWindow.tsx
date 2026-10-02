@@ -31,9 +31,9 @@ export const windowPlacement = (frame: number) => {
   const toCraft = progress(frame, CUES.beam, 40, EASE.inOut);
   const toDevices = springAt(frame, CUES.toDevices, SPRINGS.glide);
   const { breath, inward: collapse, alpha } = collapseAt(frame);
-  const scale = mix(mix(1, 0.9, toCraft), 0.74, toDevices) * (1 + breath) * mix(1, 0.18, collapse);
+  const scale = mix(mix(1, 0.9, toCraft), 0.72, toDevices) * (1 + breath) * mix(1, 0.18, collapse);
   const cx = 960;
-  const cy = mix(mix(mix(615, 618, toCraft), 590, toDevices), COLLAPSE_POINT.y, collapse);
+  const cy = mix(mix(mix(615, 618, toCraft), 600, toDevices), COLLAPSE_POINT.y, collapse);
   return { cx, cy, scale, toDevices, collapse, breath, alpha };
 };
 

@@ -34,31 +34,31 @@ export const StatBadge: React.FC<Props> = ({ value, label, source, start, exitAt
         transformOrigin: anchor === 'right' ? 'right center' : 'left center',
         opacity: Math.min(1, p * 1.5) * (1 - fade),
         ...glass(),
-        borderRadius: 24,
-        padding: '18px 28px 18px 24px',
+        borderRadius: 22,
+        padding: '14px 26px 14px 22px',
         display: 'flex',
         alignItems: 'center',
-        gap: 20,
+        gap: 16,
         fontFamily: FONTS.display,
         whiteSpace: 'nowrap',
       }}
     >
       <div
         style={{
-          fontSize: 64,
+          fontSize: 56,
           fontWeight: 600,
           letterSpacing: '-0.05em',
           color: COLORS.neon,
           fontVariantNumeric: 'tabular-nums',
           textShadow: '0 0 26px rgba(230,250,20,0.35)',
-          minWidth: 140,
+          minWidth: 122,
         }}
       >
         +{count}%
       </div>
       <div>
-        <div style={{ fontSize: 23, fontWeight: 500, color: white(0.94), letterSpacing: '-0.01em' }}>{label}</div>
-        <div style={{ marginTop: 4, fontSize: 15, color: white(0.5) }}>{source}</div>
+        <div style={{ fontSize: 21, fontWeight: 500, color: white(0.94), letterSpacing: '-0.01em' }}>{label}</div>
+        <div style={{ marginTop: 3, fontSize: 14, color: white(0.5) }}>{source}</div>
       </div>
     </div>
   );

@@ -46,8 +46,8 @@ export const Scene4Overlay: React.FC = () => {
   if (frame < CUES.stat1 || frame > CUES.collapse + 30) return null;
   return (
     <AbsoluteFill>
-      <StatBadge value={34} label="Conversion rate" source="Viscont Jewellery" start={CUES.stat1} exitAt={CUES.collapse - 6} x={96} y={262} />
-      <StatBadge value={19} label="Customer retention" source="Viscont Jewellery" start={CUES.stat2} exitAt={CUES.collapse - 4} x={1824} y={262} anchor="right" />
+      <StatBadge value={34} label="Conversion rate" source="Viscont Jewellery" start={CUES.stat1} exitAt={CUES.collapse - 6} x={88} y={240} />
+      <StatBadge value={19} label="Customer retention" source="Viscont Jewellery" start={CUES.stat2} exitAt={CUES.collapse - 4} x={1832} y={240} anchor="right" />
     </AbsoluteFill>
   );
 };
