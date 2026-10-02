@@ -33,7 +33,7 @@ export const CUES = {
   windowLand: 162,
   siteChunks: [152, 162, 173],
   title2: 186,
-  issues: [218, 233, 248, 263, 278],
+  issues: [beat(14), beat(15), beat(16), beat(17), beat(18)],
   glitch: 289,
   beam: 300,
   beamEnd: 336,
@@ -67,11 +67,11 @@ export const CUES = {
   stat2: 626,
   riser: 684,
   collapse: 684,
-  collapseFrames: 20,
+  collapseFrames: 22,
   title4Out: 678,
 
   // Scene 5 - Logo reveal: the outline draws out of the point of light during the riser, then the hit fills it.
-  logoDraw: 700,
+  logoDraw: 703,
   logoHit: 720,
   logoFill: 720,
   logoSweep: 744,

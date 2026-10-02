@@ -18,10 +18,10 @@ const clampOpts = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as con
 // Collapse into the point of light: a short outward breath (anticipation), then an accelerating pull inward.
 export const collapseAt = (frame: number) => {
   const t = clamp01((frame - CUES.collapse) / CUES.collapseFrames);
-  const breath = t < 0.3 ? Math.sin((t / 0.3) * Math.PI) * 0.03 : 0;
-  const inward = t < 0.15 ? 0 : ((t - 0.15) / 0.85) ** 2.2;
-  // Opacity leads the shrink so the screen is clear by the time the logo outline starts to trace.
-  return { breath, inward, alpha: 1 - clamp01(inward * 1.3) };
+  const breath = t < 0.28 ? Math.sin((t / 0.28) * Math.PI) * 0.03 : 0;
+  const inward = t < 0.12 ? 0 : ((t - 0.12) / 0.88) ** 2;
+  // Stays visible while it shrinks, then vanishes into the light as the logo outline starts to trace.
+  return { breath, inward, alpha: 1 - clamp01((inward - 0.35) / 0.65) };
 };
 
 export const COLLAPSE_POINT = { x: 960, y: 535 };
@@ -98,7 +98,8 @@ export const HeroWindow: React.FC = () => {
   if (frame < CUES.caretIn || frame > CUES.collapse + 30) return null;
 
   const open = springAt(frame, CUES.pillOpen, { damping: 18, stiffness: 110, mass: 1 });
-  // Two-stage morph: the search bar widens and rises into the address-bar slot, then the body drops down from it.
+  // Two-stage morph: the search bar rises and shrinks into the address-bar slot while the window chrome
+  // grows out around it, then the page body drops down from the chrome.
   const widen = springAt(frame, CUES.morph, { damping: 22, stiffness: 120, mass: 1 });
   const morph = springAt(frame, CUES.morph + 6, { damping: 24, stiffness: 85, mass: 1 });
   const press = frame >= CUES.enter && frame < CUES.enter + 10 ? Math.sin(((frame - CUES.enter) / 10) * Math.PI) : 0;
@@ -107,18 +108,19 @@ export const HeroWindow: React.FC = () => {
 
   const pillW = mix(4, PILL.w, open);
   const w = mix(pillW, WINDOW_W, widen);
-  const h = mix(PILL.h, WINDOW_H, morph);
+  const h = mix(mix(PILL.h, CHROME_H, widen), WINDOW_H, morph);
   const x = mix(PILL.cx, cx, widen) - w / 2;
   const y = mix(PILL.cy - PILL.h / 2, cy - WINDOW_H / 2, widen);
   const radius = mix(PILL.h / 2, 18, morph);
 
   const abW = 520;
+  const abWidth = mix(pillW, abW, widen);
   const ab = {
-    x: mix(0, (w - abW) / 2, morph),
-    y: mix(0, 9, morph),
-    w: mix(w, abW, morph),
-    h: mix(PILL.h, 34, morph),
-    r: mix(PILL.h / 2, 17, morph),
+    x: (w - abWidth) / 2,
+    y: mix(0, 9, widen),
+    w: abWidth,
+    h: mix(PILL.h, 34, widen),
+    r: mix(PILL.h / 2, 17, widen),
   };
 
   const typed = Math.max(0, Math.min(SEARCH_QUERY.length, Math.floor((frame - CUES.typeStart) / CUES.typeFramesPerChar)));
@@ -129,8 +131,8 @@ export const HeroWindow: React.FC = () => {
   const glassAlpha = Math.max(Math.min(1, open * 2.5), morph);
   const searchAlpha = (1 - progress(frame, CUES.morph + 2, 8, EASE.out)) * interpolate(open, [0.35, 0.8], [0, 1], clampOpts);
   const loneCaret = 1 - interpolate(open, [0, 0.3], [0, 1], clampOpts);
-  const urlAlpha = progress(frame, CUES.morph + 18, 12, EASE.out);
-  const frameAlpha = progress(frame, CUES.morph + 4, 14, EASE.out);
+  const urlAlpha = progress(frame, CUES.morph + 9, 12, EASE.out);
+  const frameAlpha = progress(frame, CUES.morph, 12, EASE.out);
 
   const beamP = progress(frame, CUES.beam, CUES.beamEnd - CUES.beam, EASE.inOut);
   const beamX = mix(-60, SITE_W + 60, beamP);
@@ -139,7 +141,10 @@ export const HeroWindow: React.FC = () => {
   const contentScale = w / WINDOW_W;
   const beamGlow = interpolate(frame, [CUES.beam, CUES.beam + 6, CUES.beamEnd - 4, CUES.beamEnd + 4], [0, 1, 1, 0], clampOpts);
 
-  const bezel = progress(frame, CUES.toDevices + 6, 18, EASE.out);
+  const bezel = progress(frame, CUES.toDevices + 4, 10, EASE.out);
+  const bezelGrow = springAt(frame, CUES.toDevices + 4, SPRINGS.smooth);
+  const inset = 22 * bezelGrow;
+  const base = springAt(frame, CUES.toDevices + 12, SPRINGS.smooth);
 
   return (
     <div
@@ -156,35 +161,39 @@ export const HeroWindow: React.FC = () => {
       }}
     >
       {toDevices > 0.01 ? (
-        <div
-          style={{
-            position: 'absolute',
-            left: cx - WINDOW_W / 2 - 22,
-            top: cy - WINDOW_H / 2 - 22,
-            width: WINDOW_W + 44,
-            height: WINDOW_H + 44,
-            borderRadius: 34,
-            background: 'linear-gradient(180deg, #1b1b1e, #0d0d0f)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            boxShadow: '0 60px 160px rgba(0,0,0,0.7)',
-            opacity: bezel,
-          }}
-        >
+        <>
+          {/* The base is painted before the bezel so it slides out from behind the screen. */}
           <div
             style={{
               position: 'absolute',
-              left: -110,
-              right: -110,
-              top: WINDOW_H + 44,
+              left: cx - WINDOW_W / 2 - inset - 110,
+              width: WINDOW_W + inset * 2 + 220,
+              top: cy + WINDOW_H / 2 + inset,
               height: 30,
               borderRadius: '4px 4px 26px 26px',
               background: 'linear-gradient(180deg, #4a4a4f 0%, #2a2a2e 45%, #141416 100%)',
               borderTop: '1px solid rgba(255,255,255,0.25)',
+              transform: `translateY(${(1 - base) * -24}px) scaleX(${0.82 + 0.18 * base})`,
+              opacity: Math.min(1, base * 1.4),
             }}
           >
             <div style={{ position: 'absolute', left: '50%', top: 0, width: 220, height: 10, marginLeft: -110, borderRadius: '0 0 10px 10px', background: '#1a1a1d' }} />
           </div>
-        </div>
+          <div
+            style={{
+              position: 'absolute',
+              left: cx - WINDOW_W / 2 - inset,
+              top: cy - WINDOW_H / 2 - inset,
+              width: WINDOW_W + inset * 2,
+              height: WINDOW_H + inset * 2,
+              borderRadius: 18 + inset * (16 / 22),
+              background: 'linear-gradient(180deg, #1b1b1e, #0d0d0f)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 60px 160px rgba(0,0,0,0.7)',
+              opacity: bezel,
+            }}
+          />
+        </>
       ) : null}
 
       <div
@@ -235,7 +244,7 @@ export const HeroWindow: React.FC = () => {
           </div>
 
           {frameAlpha > 0 ? (
-            <div style={{ position: 'absolute', left: 0, top: CHROME_H, width: w, height: Math.max(0, h - CHROME_H), overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', left: 0, top: CHROME_H, width: w, height: (WINDOW_H - CHROME_H) * morph, overflow: 'hidden' }}>
               <div style={{ position: 'absolute', left: 0, top: 0, width: SITE_W, height: 608, transform: `scale(${contentScale})`, transformOrigin: '0 0' }}>
                 {showOld ? (
                   <div style={{ position: 'absolute', inset: 0, clipPath: `inset(0 0 0 ${Math.max(0, beamX)}px)` }}>
@@ -289,11 +298,11 @@ export const HeroWindow: React.FC = () => {
             width: ab.w,
             height: ab.h,
             borderRadius: ab.r,
-            background: `linear-gradient(180deg, rgba(255,255,255,${mix(0.1, 0.06, morph) * glassAlpha}), rgba(255,255,255,${mix(0.04, 0.05, morph) * glassAlpha}))`,
-            border: `1px solid rgba(255,255,255,${mix(0.16, 0.08, morph) * glassAlpha})`,
+            background: `linear-gradient(180deg, rgba(255,255,255,${mix(0.1, 0.06, widen) * glassAlpha}), rgba(255,255,255,${mix(0.04, 0.05, widen) * glassAlpha}))`,
+            border: `1px solid rgba(255,255,255,${mix(0.16, 0.08, widen) * glassAlpha})`,
             boxShadow: [
-              `0 24px 70px rgba(0,0,0,${0.55 * (1 - morph) * glassAlpha})`,
-              `inset 0 1px 0 rgba(255,255,255,${0.12 * (1 - morph) * glassAlpha})`,
+              `0 24px 70px rgba(0,0,0,${0.55 * (1 - widen) * glassAlpha})`,
+              `inset 0 1px 0 rgba(255,255,255,${0.12 * (1 - widen) * glassAlpha})`,
               `0 0 0 1px ${neon(0.38 * focus)}`,
               `0 0 46px ${neon(0.14 * focus)}`,
             ].join(', '),
@@ -305,14 +314,16 @@ export const HeroWindow: React.FC = () => {
             <div
               style={{
                 position: 'absolute',
-                left: 30,
+                left: mix(30, 16, widen),
                 top: 0,
-                height: PILL.h,
+                bottom: 0,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 18,
                 opacity: searchAlpha,
                 whiteSpace: 'nowrap',
+                transform: `scale(${mix(1, 0.5, widen)})`,
+                transformOrigin: '0 50%',
               }}
             >
               <SearchIcon size={28} color={white(0.62)} strokeWidth={2} />

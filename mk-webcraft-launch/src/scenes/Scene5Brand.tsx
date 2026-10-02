@@ -121,14 +121,14 @@ export const Scene5Brand: React.FC = () => {
   const point = interpolate(
     frame,
     [CUES.collapse + 8, CUES.collapse + CUES.collapseFrames, CUES.logoHit - 2, CUES.logoHit],
-    [0, 0.55, 0.75, 1],
+    [0, 0.6, 0.75, 1],
     clampOpts,
   );
   const flash = progress(frame, CUES.logoHit, 18, EASE.out);
   const ring = progress(frame, CUES.logoHit, 34, EASE.out);
   // Under-damped so the mark contracts past its rest size on the hit and springs back: the "punch".
   const punch = springAt(frame, CUES.logoHit, { damping: 9, stiffness: 200, mass: 0.6 });
-  const lock = springAt(frame, CUES.lockup, { damping: 26, stiffness: 90, mass: 1 });
+  const lock = springAt(frame, CUES.lockup, { damping: 16, stiffness: 100, mass: 1 });
 
   const draw = progress(frame, CUES.logoDraw, CUES.logoHit - CUES.logoDraw - 2, EASE.inOut);
   const strokeAlpha = interpolate(frame, [CUES.logoDraw, CUES.logoDraw + 5, CUES.logoHit + 8, CUES.logoHit + 24], [0, 1, 1, 0], clampOpts);
